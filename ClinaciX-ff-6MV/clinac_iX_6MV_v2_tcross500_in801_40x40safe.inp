@@ -1,0 +1,468 @@
+$OMP=8
+[ T i t l e ]
+Fotoneutron
+
+[ P a r a m e t e r s ]
+ icntl    =           0     # (D=0) 3:ECH 5:NOR 6:SRC 7,8:GSH 11:DSH 12:DUMP
+ maxcas   =        1E+6     # (D=10) number of particles per one batch
+ maxbch   =          500     # (D=10) number of batches
+ emin(12) = 0.521 #cutoff electron MeV
+ emin(13) = 0.521 #cutoff positron Mev
+ emin(14) = 0.010 #cutoff photon
+ emin(2)  = 1E-8   #cutoff neutron
+$ file(1) = c:/phits        # (D=c:/phits) PHITS install folder name
+ file(6)  = phits.out       # (D=phits.out) general output file name
+ negs     =          1     # (D=-1) =-1:original, =0:No, =1:EGS
+ nlost	  =        1000
+ $lib(14)  =      20u
+ $dpnmax   =    20
+ dmax(2)  = 20
+ dmax(14) = 20
+$ ipnint   =           1     # (D=0) 0: no, 1: consider photo-nuclear reaction
+$ pnimul   = 1000.0           # pengali photo-nuclear
+file(7)   = C:/phits/data/xsdir.jnd # (D=xdirs) nuclear data input file name
+file(20)  = C:/phits/XS/egs # (D=/phits/XS/egs) EGS data folder name
+etsmax    = 15.
+etsmin    = 1.E-6
+$  must option for DCHAIN 
+$ jmout    =           1     # (D=0) Density echo, 0:input, 1:number density
+$ file(21) = C:/phits/dchain-sp/data # (D=c:/phits/dchain-sp/data) dchain data folder name
+$ e-mode   =           0     # (D=0) Event generator mode is not recommended for DCHAIN calculation
+itall=1
+
+$infl:{wwg.out}
+set:c1[10.0] $field size
+set:c2[10] $MLC
+
+[ Transform ]
+tr1    0  0  0    0  0  100    2  atan((c1/2)/100)  0  0  0  0    3 $axis = 1 karena ke arah x-axis
+tr2    0  0  0    0  0  100    2  -atan((c1/2)/100)  0  0  0  0    3    $axis = 1 karena ke arah x-axis
+tr3    0  0  0    0  0  100    1  -atan((c1/2)/100)  0  0  0  0    3 $axis = 2 karena ke arah y-axis
+tr4    0  0  0    0  0  100    1  atan((c1/2)/100)  0  0  0  0    3    $axis = 2 karena ke arah y-axis
+tr5   -c2/4 0 0   0  0   0     0   0    0   0   0   0       3 $mlc left
+tr6   c2/4 0 0   0  0   0     0   0    0   0   0   0       3 $mlc right
+
+[Source]
+   s-type =   1             # mono-energetic axial source
+     proj =  electron         # kind of incident particle         
+      dir =   -1.0           # z-direction of beam [cosine]
+       r0 =   0.2            # radius [cm]
+       z0 =   102            # minimum position of z-axis [cm]
+       z1 =   102            # maximum position of z-axis [cm]
+       e0 =   6.2          	# energy of beam [MeV/u]
+
+[ S o u r c e ] off
+   s-type =  17             # external source with PHITS dump file
+     file =  cross_photon_dmp.out  # file name of dump file            
+     dump =   -12           # (D=0) number of dumped data, <0: ascii, >0: binary
+    1 2 3 4 5 6 7 8 9 10 18 19
+    idmpmode = 0
+
+[ V o l u m e ]
+  non      non      vol      non      reg
+    1        1   1.5589E+03  0.0018   1
+    2        2   1.5589E+03  0.0018   2
+    3        3   1.5397E+03  0.0018   3
+    4        4   1.5386E+03  0.0018   4
+    5        6   2.6029E-01  0.0264   6
+    6        7   3.1833E+00  0.0170   7
+    7       10   1.2855E+03  0.0023   10
+    8       31   1.1783E+01  0.0089   31
+ $   9      200   7.4655E+02  0.0022   200
+ $  10      300   7.4605E+02  0.0022   300
+ 
+ 
+
+[ T - V o l u m e ] off
+ mesh = reg # mesh type is region-wise
+ reg = 1 2 3 4 6 7 10 31 200 300
+ file = volume.out # file name of output for [volume]
+ s-type = 1 # 1: Sphere source, 2: Rectangular source
+ x0 = 0.0 # (D=0.0) x of sphere center
+ y0 = 0.0 # (D=0.0) y of sphere center
+ z0 = 50.0 # (D=0.0) z of sphere center
+ r0 = 60.0 # radius of sphere
+
+[Material]
+$ Z*1000+A
+mat[1] 1000.20u 2 8000.20u 1 		$water
+mat[2] 74000.20u 1 	$tungsten 74 183.84
+mat[3] 29000.20u 1	$copper 29 63.546
+mat[4] 4000.20u 1		$Kaca Be 4 9
+mat[5] 6000.20u -0.691127 1000.20u -0.026363 7000.20u -0.073271 8000.20u -0.209238 $KAPTON
+mat[6] 74000.20u -0.925 29000.20u -0.075 $MLC
+mat[9] 7000.20u -0.755268 8000.20u -0.231781 18000.20u -0.012827 6000.20u -0.000124 $udara
+
+[Surface]
+1 rpp -10 0 -10 10 60 67.8 $jaw-x
+2 rpp 0 10 -10 10 60 67.8
+3 rpp -10 10 -10 0 70 77.7 $jaw-y
+4 rpp -10 10 0 10 70 77.7
+5 trc 0 0 92.5 0 0 7.5 2.09 0.01
+6 rpp -1 1 -1 1 99.9111 100
+7 rpp -1 1 -1 1 99.7536 99.9111
+8 sph 0 0 100 2
+9 rpp -1 1 -1 1 100 106
+10 rpp -5 5 -5 5 92.5 106
+11 rpp -5 5 -5 5 92.49746 92.5
+31 rcc 0 0 87.57 0 0 0.065 1.5     $base FF 6MV
+32 trc 0 0 87.6350 0 0 0.038 1.5 1.1
+33 trc 0 0 87.6730 0 0 0.051 1.1 1.0
+34 trc 0 0 87.7240 0 0 0.056 1.0 0.9 
+35 trc 0 0 87.7800 0 0 0.061 0.9 0.8
+36 trc 0 0 87.8410 0 0 0.066 0.8 0.7
+37 trc 0 0 87.9070 0 0 0.073 0.7 0.6
+38 trc 0 0 87.9800 0 0 0.075 0.6 0.5
+39 trc 0 0 88.0550 0 0 0.082 0.5 0.4
+40 trc 0 0 88.1370 0 0 0.041 0.4 0.350
+41 trc 0 0 88.1780 0 0 0.044 0.350 0.3
+42 trc 0 0 88.2220 0 0 0.043 0.3 0.250
+43 trc 0 0 88.2650 0 0 0.043 0.250 0.2
+44 trc 0 0 88.3080 0 0 0.053 0.2 0.15
+45 trc 0 0 88.3610 0 0 0.029 0.15 0.1 
+46 trc 0 0 88.3900 0 0 0.016 0.1 0.075
+47 trc 0 0 88.4060 0 0 0.015 0.075 0.05
+48 trc 0 0 88.4210 0 0 0.011 0.05 0.025
+49 trc 0 0 88.4320 0 0 0.011 0.025 0.0001
+50 sph 0 0 85 0.5
+60 rcc 0 0 45 0 0 65 21
+61 rcc 0 0 44.8 0 0 65.4 21.3
+62 rpp -20 20 -20 20 44.8 45
+c 200 rpp  -6.5 0 -10.4 10.45 46.195 51.805 $MLC left
+c 300 rpp  0 6.5 -10.4 10.45 46.195 51.805  $MLC Right
+c $201 c/y -10 49 50
+c 401 p 5 0 1 50 $sudut MLC
+c 402 p -5 0 1 48 $sudut MLC
+c 403 p -5 0 1 50 $sudut MLC
+c 404 p 5 0 1 48 $sudut MLC
+500 rcc 0 0 34.95 0 0 0.10 20 $Dump slab in region 801 (below MLC/Jaw), radius enlarged for up to 40x40 at iso
+800 pz 40
+801 pz 30
+802 pz 20
+803 pz 10
+$water phantom nonvoxel
+ 700 rpp -25 25 -25 25 -40 0
+ 701 pz -2
+ 702 pz -4
+ 703 pz -6
+ 704 pz -8
+100 rpp -100 100 -100 100 -100 200 $boundary
+
+[cell]
+1 2 -19.3 -1  trcl=1   $jaw-x
+2 2 -19.3 -2  trcl=2  
+3 2 -19.3 -3  trcl=3   $jaw-y
+4 2 -19.3 -4  trcl=4 
+5 0 -5 #6 #7 #8
+6 2 -19.3 -6 $target tungsten
+7 3 -8.96 -7 $target cu
+8 0 -8 #6 #7 $vakum dan kolimator primer
+10 2 -19.3 -10 #5 #8 #6 #7 $head linac
+11 4 -1.85 -11 $Kaca vakum
+31 3 -8.92 (-31:-32:-33:-34:-35:-36:-37:-38:-39:-40:-41:-42:-43:-44:-45:-46:-47:-48:-49) $efisiensi cell FF
+50 9 -0.0012 -50
+60 9 -0.0012 -60 #1 #2 #3 #4 #5 #6 #7 #8 #10 #11 #31 #50 
+61 2 -19.3 -61 60 #62
+62 9 -0.0012 -62
+c 200 2 -17.8 -200 -401 402 trcl=5 $MLC Left
+c 300 2 -17.8 -300 -403 404 trcl=6 $MLC Right
+700 1 -1 -700 -704
+701 1 -1 -700 701
+702 1 -1 -700 -701 702
+703 1 -1 -700 -702 703
+704 1 -1 -700 -703 704
+500 9 -0.0012 -500 $Thin air slab for T-cross dump plane inside region 801
+800 9 -0.0012 -100 800 #1 #2 #3 #4 #5 #6 #7 #8 #10 #11 #31 #50 #60 #61 #62 $#700
+801 9 -0.0012 -100 -800 801 #500
+802 9 -0.0012 -100 -801 802
+803 9 -0.0012 -100 -802 803
+804 9 -0.0012 -100 -803 #700 #702 #701 #703 #704
+900 -1   100
+
+[ T - T r a c k ]
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =  100            # number of x-mesh points
+     xmin =  -25.           # minimum value of x-mesh points
+     xmax =   25.           # maximum value of x-mesh points
+   y-type =    1            # y-mesh is given by the below data
+       ny =    1            # number of y-mesh points
+           -5.0  5.0
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+       nz =  100            # number of z-mesh points
+     zmin =  -40.           # minimum value of z-mesh points
+     zmax =  112.           # maximum value of z-mesh points
+   t-type =    2            # t-mesh is linear given by tmin, tmax and nt
+       nt =    1            # number of t-mesh points
+     tmin =   0.0           # minimum value of t-mesh points
+     tmax =   20000.0           # maximum value of t-mesh points
+     part =   photon electron   
+    2D-type =    7
+   e-type =    1            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+            0.0  1000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   xz            # axis of output
+     file = track_xz.out  # file name of output for the above axis
+    title = Photon Flux Distribution
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+
+[ T - T r a c k ]off
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =  100            # number of x-mesh points
+     xmin =  -25.           # minimum value of x-mesh points
+     xmax =   25.           # maximum value of x-mesh points
+   y-type =    1            # y-mesh is given by the below data
+       ny =    1            # number of y-mesh points
+           -5.0  5.0
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+       nz =  100            # number of z-mesh points
+     zmin =  -40.           # minimum value of z-mesh points
+     zmax =  112.           # maximum value of z-mesh points
+   t-type =    2            # t-mesh is linear given by tmin, tmax and nt
+       nt =    1            # number of t-mesh points
+     tmin =   0.0           # minimum value of t-mesh points
+     tmax =   20000.0           # maximum value of t-mesh points
+     part =   electron   
+    2D-type =    7
+   e-type =    1            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+            0.0  1000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   xz            # axis of output
+     file = track_xz_electron.out  # file name of output for the above axis
+    title = Photon Flux Distribution
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+
+[ T - T r a c k ] off
+    title = Focused View of Flattening Filter (FF)
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh linear
+       nx =  200            # ditingkatkan agar resolusi tajam
+     xmin =  -2.5           # area dipersempit (radius FF max 1.5 cm)
+     xmax =   2.5
+   y-type =    1            
+       ny =    1            
+     -0.1   0.1             # potongan tipis di tengah (y=0)
+   z-type =    2            
+       nz =  400            # ditingkatkan karena FF sangat tipis di sumbu Z
+     zmin =   87.0          # mulai sedikit di bawah base FF (87.57)
+     zmax =   89.0          # berakhir sedikit di atas tip FF (88.44)
+   t-type =    2            # t-mesh is linear given by tmin, tmax and nt
+       nt =    1            # number of t-mesh points
+     tmin =   0.0           # minimum value of t-mesh points
+     tmax =   20000.0           # maximum value of t-mesh points   
+	part =  photon electron
+   e-type =    1            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+            0.0  1000.0    
+	unit =    1            
+     axis =   xz            
+     file = track_ff_focused.out 
+    gshow =    3            # 3: bnd+reg, coba ganti ke 2 jika masih sulit terlihat
+   epsout =    1
+
+[ T - C r o s s ] 
+    title = Energy distribution in region mesh
+     mesh =  reg            # mesh type is region-wise
+      reg =    1            # number of crossing regions
+      non     r-from  r-to       area
+        1    801     500      1256.637 
+   e-type =    2            # e-mesh is linear given by emin, emax and ne
+     emin =   0.0           # minimum value of e-mesh points
+     emax =   11.0           # maximum value of e-mesh points
+       ne =  200            # number of e-mesh points
+     unit =    1            # unit is [1/cm^2/source]
+     axis =  eng            # axis of output
+     file = cross_photon_energy.out   # file name of output for the above axis
+   output = flux         # surface crossing flux
+     part =  photon   
+   epsout =    1            # (D=0) generate eps file by ANGEL
+$    dump =   -12           # (D=0) number of dumped data, <0: ascii, >0: binary
+$               1   2   3   4   5   6   7   8   9  10   18   19
+
+[ T - C r o s s ] 
+    title = Energy distribution in region mesh
+     mesh =  reg            # mesh type is region-wise
+      reg =    1            # number of crossing regions
+      non     r-from  r-to       area
+        1    801     500      1256.637 
+   e-type =    2            # e-mesh is linear given by emin, emax and ne
+     emin =   0.0           # minimum value of e-mesh points
+     emax =   11.0           # maximum value of e-mesh points
+       ne =  200            # number of e-mesh points
+     unit =    1            # unit is [1/cm^2/source]
+     axis =  eng            # axis of output
+     file = cross_photon.out   # file name of output for the above axis
+   output = flux         # surface crossing flux
+     part =  photon   
+   epsout =    0            # (D=0) generate eps file by ANGEL
+    dump =   -12           # (D=0) number of dumped data, <0: ascii, >0: binary
+               1   2   3   4   5   6   7   8   9  10   18   19
+
+[ T - Deposit ]
+    title = Percentage Depth Dose
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    1            # x-mesh is linear given by xmin, xmax and nx
+       nx =  1            # number of x-mesh points
+           -1.0  1.0
+   y-type =    1            # y-mesh is given by the below data
+       ny =    1            # number of y-mesh points
+           -1.0  1.0
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+     zmin =  -40.00000      # minimum value of z-mesh points
+     zmax =   0.00000      # maximum value of z-mesh points
+       nz =  100            # number of z-mesh points
+     unit =    0            # unit is Gy/source
+ material =  all            # (D=all) number of specific material
+   output =  dose           # total deposit energy
+     axis =    z           # axis of output
+     file = pdd.out     # file name of output for the above axis
+     part = all    
+    gshow =    1            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+   angel = ylin
+
+[ T - Deposit ]
+    title = Percentage Depth Dose hr
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    1            # x-mesh is linear given by xmin, xmax and nx
+       nx =  1            # number of x-mesh points
+           -1.0  1.0
+   y-type =    1            # y-mesh is given by the below data
+       ny =    1            # number of y-mesh points
+           -1.0  1.0
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+     zmin =  -5.00000      # minimum value of z-mesh points
+     zmax =   0.00000      # maximum value of z-mesh points
+       nz =  50            # number of z-mesh points
+     unit =    0            # unit is Gy/source
+ material =  all            # (D=all) number of specific material
+   output =  dose           # total deposit energy
+     axis =    z           # axis of output
+     file = pdd_hr.out     # file name of output for the above axis
+     part = all    
+    gshow =    1            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+   angel = ylin
+
+[ T - Deposit ] 
+    title = Photon Profile
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =  100            # number of x-mesh points
+     xmin = -10.0
+     xmax = 10.0
+   y-type =    2            # y-mesh is given by the below data
+   ymin	 = -0.5
+   ymax	= 0.5
+       ny =    1            # number of y-mesh points
+      
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+   zmin	= -10.5
+    zmax = -10.0   
+	  nz =  1            # number of z-mesh points
+   
+     unit =    0            # unit is Gy/source
+     axis =    x           # axis of output
+    output =  dose           # total deposit energy
+    material = all
+     file = profile_photon.out     # file name of output for the above axis
+     part = electron     
+    gshow =    1            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+   angel = ylin
+
+[ T - T r a c k ] off          # spektrum energi, saya taruh di bawah FF
+    title = Track Detection in xyz mesh
+     mesh =  reg            # mesh type is xyz scoring mesh
+    reg = 50 31 1 2 3 4 10
+   e-type =    3            # e-mesh is given by the below data
+       ne =  100            # number of e-mesh points
+$            0.0  5000.0
+     emin = 0.01
+     emax = 20
+   t-type =    1            # t-mesh is given by the below data
+       nt =    1            # number of t-mesh points
+            0.0  1.0e+9
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   eng           # axis of output
+     file = track_eng2.out  # file name of output for the above axis
+     part =  photon neutron
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+
+[ T - WWG ] off
+  mesh = xyz
+x-type = 2
+  xmin = -20
+  xmax =  20
+    nx = 50
+y-type = 2
+  ymin = -20
+  ymax =  20
+    ny = 10
+z-type = 2
+  zmin =  40
+  zmax =  107
+    nz =  50
+   part = neutron
+   e-type = 1
+       ne = 1
+     0   10.5
+axis = xy
+file =  wwg-xy.out
+axis =  wwg
+file =  wwg.out
+epsout = 1
+elowthre = 0.01
+chwei(1) = 10.0
+
+[ T - D C H A I N ] off  
+$  must section for DCHAIN 
+    title = X-ray generated by 10MeV electron 
+     mesh =  reg               # mesh type is region-wise
+      reg =  1 2 3 4 10 31 200 300
+     file = dchainLinac.out  # file name of dchain-sp input file
+  timeevo =    2               # time evolution
+    1.0 m  1.0
+    10.0 m 0.0
+  outtime =    11               # output time
+    30.0 s
+    1.0 m
+    2.0 m
+    3.0 m
+    4.0 m
+    5.0 m
+    6.0 m
+    7.0 m
+    8.0 m
+    9.0 m
+   10.0 m
+
+[importance] off
+part=photon
+reg imp
+60 1.0
+800 3.0
+801 9.0
+802 27.0
+803 81.0
+804 243.0
+701 729.0
+702 1458
+703 2916
+704 5832
+700 11664
+   
+$ dose Rate (MU/min)
+set:c3[600.0]
+$ beam power (source/sec) 
+set:c4[ c3/60 * 1/(9.5471E-14) ]
+   amp = c4                 # (D=1.0) Source Intensity(source/sec)
+   
+
+[END]
